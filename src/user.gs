@@ -1,48 +1,43 @@
-USERS_PATH = "/root/store/users/";
+USERS_PATH = "/root/store/users/"
 
 User = {}
 User.username = ""
+User.btc_username = ""
 User.password = ""
+User.products = []
+User.owns = []
+User.upvotes = []
+User.downvotes = []
 User.save = function ()
-  user_data = "password:" + md5(self.password)
-  db_conn.host_computer.touch(USERS_PATH, self.username)
-  file = db_conn.host_computer.File(USERS_PATH + self.username)
+  user_data = "username:" + self.username + char(10) + "btc_username:" + self.btc_username + char(10)
+  user_data = user_data + "password:" + self.password + char(10) + "products:" + self.products.join(",") + char(10)
+  user_data = user_data + "owns:" + self.owns.join(",") + char(10) + "upvotes:" + self.upvotes.join(",") + char(10)
+  user_data = user_data + "downvotes:" + self.downvotes.join(",")
+
+  db_conn.host_computer.touch(USERS_PATH, self.username + ".def")
+  file = db_conn.host_computer.File(USERS_PATH + self.username + ".def")
   file.set_content(user_data)
 end function
 
 user_load = function (username)
-  file = db_conn.host_computer.File(USERS_PATH + username)
-  if not file then
+  user = db_load(User, USERS_PATH + username + ".def")
+  if not user then
     return 0
   end if
-
-  user = new User
-  user.username = username
-  user_data = file.get_content()
-  user_data = user_data.split(char(10))
-
-  for line in user_data
-    line = line.split(":")
-    line[1] = line[1].split(",")
-    if line[1].len == 1 then
-      line[1] = line[1][0]
-    end if
-
-    user[line[0]] = line[1]
-  end for
 
   return user
 end function
 
-user_create = function (username, password)
-  file = db_conn.host_computer.File(USERS_PATH + self.username)
+user_create = function (username, btc_username, password)
+  file = db_conn.host_computer.File(USERS_PATH + username + ".def")
   if file then
     return 0
   end if
 
   user = new User
   user.username = username
-  user.password = password
+  user.btc_username = btc_username
+  user.password = md5(password)
   user.save()
 
   return user
