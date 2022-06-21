@@ -1,14 +1,12 @@
-# greymarket
+# Zer0Day Shop
+
+A shop made for Grey Hack game
 
 # TODO
-  - Add remove vote
-  - Add remove user
-  - Add search and sort
-  - Add BTC username verification
-  - Add styling
-  - Add menu multi-paging
+  - Add log out option
+  - Add log in as guest
+  - Add more features to the search and sort system
+  - Display rankings at main menu
 
 # Known issues
-  - Go back to one time operation menus
-  - Purchases with same BTC username
-  - Errors with empty products lists
+  - Errors after account deletion

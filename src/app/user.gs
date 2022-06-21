@@ -34,10 +34,15 @@ user_create = function (username, btc_username, password)
     return 0
   end if
 
+  result = BTC.transfer(btc_username, 0, btc_username)
+  if not result.bool then
+    return 0
+  end if
+
   user = new User
   user.username = username
   user.btc_username = btc_username
-  user.password = md5(password)
+  user.password = hash_password(username, password)
   user.save()
 
   return user
@@ -49,10 +54,49 @@ user_auth = function (username, password)
     return 0
   end if
 
-  password = md5(password)
+  password = hash_password(username, password)
   if user.password != password then
     return 0
   end if
 
   return user
+end function
+
+user_delete = function (username)
+  file = db_conn.host_computer.File(USERS_PATH + username + ".def")
+  if not file then
+    return 0
+  end if
+
+  user = user_load(username)
+  if user then
+    for product in user.products
+      product_delete(product)
+    end for
+
+    for product in user.owns
+      product = product_load(product)
+      product.owners.remove(product.owners.indexOf(username))
+      product.save()
+    end for
+
+    for product in user.upvotes
+      product = product_load(product)
+      product.upvoters.remove(product.upvoters.indexOf(username))
+      product.save()
+    end for
+
+    for product in user.downvotes
+      product = product_load(product)
+      product.downvoters.remove(product.downvoters.indexOf(username))
+      product.save()
+    end for
+  end if
+
+  result = file.delete()
+  if result then
+    return 0
+  end if
+
+  return 1
 end function
