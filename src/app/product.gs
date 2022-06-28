@@ -1,4 +1,4 @@
-PRODUCTS_PATH = "/root/store/products/"
+PRODUCTS_PATH = "/root/shop/products/"
 
 Product = {}
 Product.title = ""

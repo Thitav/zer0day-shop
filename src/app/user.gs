@@ -1,4 +1,4 @@
-USERS_PATH = "/root/store/users/"
+USERS_PATH = "/root/shop/users/"
 
 User = {}
 User.username = ""
@@ -31,11 +31,6 @@ end function
 user_create = function (username, btc_username, password)
   file = db_conn.host_computer.File(USERS_PATH + username + ".def")
   if file then
-    return 0
-  end if
-
-  result = BTC.transfer(btc_username, 0, btc_username)
-  if not result.bool then
     return 0
   end if
 

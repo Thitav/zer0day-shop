@@ -1,11 +1,13 @@
-db_connect = function (db_ip, db_port, db_user, db_password)
-  shell = get_shell()
-  db_conn = shell.connect_service(db_ip, db_port, db_user, db_password)
-  if not db_conn then
-    return 0
+Server = {}
+Server.ip = ""
+Server.port = 0
+Server.user = ""
+Server.password = ""
+Server.connect = function (shell=null)
+  if not shell then
+    shell = get_shell()
   end if
-
-  return db_conn
+  return shell.connect_service(self.ip, self.port, self.user, self.password)
 end function
 
 db_load = function (entity, filepath)

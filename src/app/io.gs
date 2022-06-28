@@ -100,7 +100,11 @@ input_bool = function (message, true_value, false_value, case_sensitive=0)
 end function
 
 print_string = function (message)
-  print("<color=#00bbff>[+]</color> <color=#fff>" + message)
+  print("<color=#00bbff>[+] <color=#fff>" + message)
+end function
+
+print_warning = function (message)
+  print("<color=#ffbf00>[!] " + message)
 end function
 
 print_error = function (message, fatal=0)

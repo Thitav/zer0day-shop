@@ -87,7 +87,8 @@ Menu.call = function ()
             continue
           end if
         else if option[0] == "exit" then
-          exit("<color=#00bbff>[+]</color> <color=#fff>Goodbye :)")
+          print_string("Goodbye :)")
+          exit()
         else if option[0] == "help" then
           help_text =             "<color=#00bbff> help</color>                <color=#fff>Displays this text\n"
           help_text = help_text + "<color=#00bbff> back, b</color>             <color=#fff>Go back to the last accessed menu\n"

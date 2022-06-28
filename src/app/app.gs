@@ -1,49 +1,63 @@
-import_code("/home/Thitav/build/BTC")
+import_code("/home/Thitav/zer0day/BTC")
 
 apt = include_lib("/lib/aptclient.so")
 
-import_code("/home/Thitav/build/product")
-import_code("/home/Thitav/build/user")
-import_code("/home/Thitav/build/menu")
-import_code("/home/Thitav/build/hash")
-import_code("/home/Thitav/build/db")
-import_code("/home/Thitav/build/io")
+import_code("/home/Thitav/zer0day/product")
+import_code("/home/Thitav/zer0day/user")
+import_code("/home/Thitav/zer0day/menu")
+import_code("/home/Thitav/zer0day/hash")
+import_code("/home/Thitav/zer0day/db")
+import_code("/home/Thitav/zer0day/io")
+
+VERSION = "1.0.0"
+
+proxy = new Server
+proxy.ip = "14.207.242.245"
+proxy.port = 22
+proxy.user = "root"
+proxy.password = "SbyAgYcx2S5FQxy"
+
+db = new Server
+db.ip = "102.44.143.156"
+db.port = 22
+db.user = "root"
+db.password = "SPLF6UULZNg7ghg"
 
 logo =        "<b><color=#fff> _____             <color=#00bbff>____</color>      __            </color></b>\n"
 logo = logo + "<b><color=#fff>/__  /  ___  _____<color=#00bbff>/ __ \</color>____/ /___ ___  __ </color></b>\n"
 logo = logo + "<b><color=#fff>  / /  / _ \/ ___<color=#00bbff>/ / / /</color> __  / __ `/ / / / </color></b>\n"
 logo = logo + "<b><color=#fff> / /__/  __/ /  <color=#00bbff>/ /_/ /</color> /_/ / /_/ / /_/ /  </color></b>\n"
 logo = logo + "<b><color=#fff>/____/\___/_/   <color=#00bbff>\____/</color>\__,_/\__,_/\__, /   </color></b>\n"
-logo = logo + "<b><color=#fff>                                 /____/    </color></b>\n"
+logo = logo + "<color=#fff>      v" + VERSION + "                         <b>/____/</b>           </color>\n\n"
 
-DB_IP = "34.51.110.137"
-DB_PORT = 22
-DB_USER = "root"
-DB_PASSWORD = "RvCUmhn7hGED6EC"
-
+logged_user = null
 shop_search = ""
 shop_sort = ""
 
+log_out = function ()
+  globals.logged_user = null
+  print_string("Logged out")
+end function
+
 set_shop_search = function (command)
   command.pull()
-  shop_search = command.join(" ")
-  menu_product_shop()
+  globals.shop_search = command.join(" ")
+  menu_product_shop(shop_search, shop_sort)
 end function
 
 set_shop_sort = function (command)
   fields = ["title", "author", "price", "score", "purchases"]
 
-  if command.len < 2 then
-    print_error("Invalid sort field")
-    wait(1)
+  if command.len < 2 or not command[1].len then
+    globals.shop_sort = ""
   else if fields.indexOf(command[1].lower) == null then
     print_error("Invalid sort field")
     wait(1)
   else
-    shop_sort = command[1].lower
+    globals.shop_sort = command[1].lower
   end if
 
-  menu_product_shop()
+  menu_product_shop(shop_search, shop_sort)
 end function
 
 menu_user_login = function ()
@@ -88,6 +102,22 @@ menu_user_register = function ()
     end while
 
     print_string("Redirecting to BTC for user verification")
+    result = BTC.transfer(btc_username, 0, btc_username)
+    if not result.bool then
+      print_error("Error verifying BTC account, please try again")
+      continue
+    end if
+
+    print_warning("Due to game limitations, data corruption may occur")
+    print_warning("You shall not upload malware to this shop")
+    print_warning("Products in this shop may contain viruses")
+
+    create = input_bool("Confirm account creation [y/n] ", "y", "n")
+    if not create then
+      print_string("Goodbye :)")
+      exit()
+    end if
+
     user = user_create(username, btc_username, password)
     if user then
       globals.logged_user = user
@@ -98,22 +128,57 @@ menu_user_register = function ()
   end while
 end function
 
-menu_user_delete = function ()
-  delete = input_bool("Confirm account deletion [y/n] ", "y", "n")
+menu_user_update_password = function ()
+  while 1
+    password = input_string("New password ", 6, 20, 0, 1)
+    confirm_password = input_string("Confirm password ", 6, 20, 0, 1)
 
+    if password != confirm_password then
+      print_error("Passwords dont match")
+      continue
+    end if
+
+    break
+  end while
+
+  logged_user.password = hash_password(logged_user.username, password)
+  logged_user.save()
+  print_string("Password changed")
+end function
+
+menu_user_update_btc = function ()
+  btc_username = input_string("New BTC username ")
+
+  print_string("Redirecting to BTC for user verification")
+  result = BTC.transfer(btc_username, 0, btc_username)
+  if result.bool then
+    logged_user.btc_username = btc_username
+    logged_user.save()
+    print_string("BTC account changed")
+  else
+    print_error("Error verifying BTC account")
+  end if
+end function
+
+menu_user_delete = function ()
+  print_warning("This action is irreversible")
+  print_warning("Deleting your account will delete all your products")
+
+  delete = input_bool("Confirm account deletion [y/n] ", "y", "n")
   if delete then
     user_delete(logged_user.username)
+    globals.logged_user = null
     print_string("Account deleted")
   end if
 end function
 
 menu_user_account = function ()
   menu = new Menu
-  menu = new Menu
   menu.header = "<color=#fff><color=#00bbff>Username:</color> " + logged_user.username + "\n"
+  menu.header = menu.header + "<color=#fff><color=#00bbff>BTC username:</color> " + logged_user.btc_username + "\n"
   menu.header = menu.header + "<color=#fff><color=#00bbff>Published products:</color> " + logged_user.products.len + "\n"
   menu.header = menu.header + "<color=#fff><color=#00bbff>Purchased products:</color> " + logged_user.owns.len + "\n"
-  menu.options = [["Delete account", @menu_user_delete]]
+  menu.options = [["Change password", @menu_user_update_password], ["Change BTC account", @menu_user_update_btc], ["Log out", @log_out], ["Delete account", @menu_user_delete]]
   menu.call()
 end function
 
@@ -127,31 +192,42 @@ menu_product_publish = function ()
 
     description = input_string("Product description ", 0, 100)
     price = input_number("Product price ")
+
     while 1
       files = input_string("Product files (path1,path2...) ", 1).split(",")
+      files_paths = []
 
-      upload = 1
+      check = 1
       for file in files
-        files[files.indexOf(file)] = file.split("/").pop()
-
         if file[0] != "/" then
           file = current_path + "/" + file
         end if
 
-        result = product_upload(title, file)
-        if not result then
-          upload = 0
+        if not get_shell().host_computer.File(file) then
           print_error("File could not be found: " + file)
+          check = 0
           break
         end if
+
+        files_paths.push(file)
       end for
 
-      if not upload then
-        product_delete(title)
-        continue
-      end if
+      if check then
+        upload = 1
+        for path in files_paths
+          result = product_upload(title, path)
+          if not result then
+            print_error("Error uploading file " + path)
+            product_delete(title)
+            upload = 0
+            break
+          end if
+        end for
 
-      break
+        if upload then
+          break
+        end if
+      end if
     end while
 
     product = product_create(title, description, price, files)
@@ -165,22 +241,33 @@ menu_product_publish = function ()
   end while
 end function
 
-menu_product_shop = function ()
+menu_product_shop = function (search="", sort="")
+  globals.shop_search = search
+  globals.shop_sort = sort
+
+  menu = new Menu
+  menu.fields = ["TITLE", "AUTHOR", "PRICE", "SCORE", "PURCHASES"]
+  menu.commands["search"] = @set_shop_search
+  menu.commands["sort"] = @set_shop_sort
+  menu.paging = 10
+
   products = product_find_all()
   products_filtered = products
   products_options = []
 
-  if shop_search then
+  if search then
+    menu.header = "<color=#00bbff>[+] <color=#fff>Searching by " + search + "\n"
     products_filtered = []
     for product in products
-      if product.title.indexOf(shop_search) != null then
+      if product.title.indexOf(search) != null then
         products_filtered.push(product)
       end if
     end for
   end if
 
-  if shop_sort then
-    products_filtered.sort(shop_sort)
+  if sort then
+    menu.header = menu.header + "<color=#00bbff>[+] <color=#fff>Sorting by " + sort + "\n"
+    products_filtered.sort(sort)
   end if
 
   for product in products_filtered
@@ -194,12 +281,7 @@ menu_product_shop = function ()
     return
   end if
 
-  menu = new Menu
-  menu.fields = ["TITLE", "AUTHOR", "PRICE", "SCORE", "PURCHASES"]
   menu.options = products_options
-  menu.commands["search"] = @set_shop_search
-  menu.commands["sort"] = @set_shop_sort
-  menu.paging = 10
   menu.call()
 end function
 
@@ -275,17 +357,15 @@ menu_product_info = function (product)
     if logged_user.owns.indexOf(product.title) != null then
       if logged_user.upvotes.indexOf(product.title) != null then
         menu.header = menu.header + "\n<color=#00bbff>[+] <color=#fff>You upvoted this product"
-        menu.options = [["Remove vote", @product_rmvote, product.title]]
+        menu.options = [["Remove vote", @product_rmvote, product.title], ["Download", @menu_product_download, product.title]]
       else if logged_user.downvotes.indexOf(product.title) != null then
         menu.header = menu.header + "\n<color=#00bbff>[+] <color=#fff>You downvoted this product"
-        menu.options = [["Remove vote", @product_rmvote, product.title]]
+        menu.options = [["Remove vote", @product_rmvote, product.title], ["Download", @menu_product_download, product.title]]
       else
-        menu.options = [["Upvote", @product_upvote, product.title], ["Downvote", @product_downvote, product.title]]
+        menu.options = [["Upvote", @product_upvote, product.title], ["Downvote", @product_downvote, product.title], ["Download", @menu_product_download, product.title]]
       end if
-
-      menu.options.push(["Download", @menu_product_download, product.title])
     else
-      menu.options.push(["Purchase", @menu_product_buy, product.title])
+      menu.options = [["Purchase", @menu_product_buy, product.title]]
     end if
   end if
 
@@ -304,6 +384,7 @@ menu_product_download = function (product)
 end function
 
 menu_product_delete = function (product)
+  print_warning("This action is irreversible")
   delete = input_bool("Confirm product deletion [y/n] ", "y", "n")
 
   if delete then
@@ -370,25 +451,27 @@ menu_product_library = function ()
   menu.call()
 end function
 
-//clear_screen()
-//print_string("Checking repository...")
-//while 1
-//  result = apt.check_upgrade(program_path)
-//  if typeof(result) == "string" then
-//    print_string("Adding repository...")
-//    apt.add_repo("214.108.200.135", 1542)
-//    apt.update()
-//    continue
-//  else if result then
-//    print_string("New version found, updating...")
-//    apt.install("zer0day", current_path)
-//  end if
-//  break
-//end while
+clear_screen()
+print_string("Checking repository...")
+while 1
+  result = apt.check_upgrade(program_path)
+  if typeof(result) == "string" then
+    print_string("Adding repository...")
+    apt.add_repo("12.239.171.129", 1542)
+    apt.update()
+    continue
+  else if result then
+    print_string("New version found, updating...")
+    apt.install("zer0day", current_path)
+    print_string("Update installed, please restart the application")
+    exit()
+  end if
+  break
+end while
 
 clear_screen()
 print_string("Connecting to servers...")
-db_conn = db_connect(DB_IP, DB_PORT, DB_USER, DB_PASSWORD)
+db_conn = db.connect(proxy.connect())
 
 menu_auth = new Menu
 menu_auth.header = logo
@@ -399,8 +482,12 @@ menu_auth.call()
 menu_main = new Menu
 menu_main.options = [["Shop", @menu_product_shop], ["Publish", @menu_product_publish], ["My Products", @menu_product_manage], ["My Library", @menu_product_library], ["Account", @menu_user_account]]
 while 1
-  logged_user = user_load(logged_user.username)
-  menu_main.header = logo + "<color=#00bbff>[+] <color=#fff>Logged as </color>" + logged_user.username + "\n"
-  menu_main.call()
-  wait(2)
+  if not logged_user then
+    menu_auth.call()
+  else
+    globals.logged_user = user_load(logged_user.username)
+    menu_main.header = logo + "<color=#00bbff>[+] <color=#fff>Logged as </color>" + logged_user.username + "\n"
+    menu_main.call()
+    wait(2)
+  end if
 end while
