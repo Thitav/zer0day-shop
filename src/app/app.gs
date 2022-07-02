@@ -1,27 +1,35 @@
-import_code("/home/Thitav/zer0day/BTC")
+import_code("/root/zer0day/BTC")
 
 apt = include_lib("/lib/aptclient.so")
 
-import_code("/home/Thitav/zer0day/product")
-import_code("/home/Thitav/zer0day/user")
-import_code("/home/Thitav/zer0day/menu")
-import_code("/home/Thitav/zer0day/hash")
-import_code("/home/Thitav/zer0day/db")
-import_code("/home/Thitav/zer0day/io")
+import_code("/root/zer0day/product")
+import_code("/root/zer0day/utils")
+import_code("/root/zer0day/user")
+import_code("/root/zer0day/menu")
+import_code("/root/zer0day/hash")
+import_code("/root/zer0day/db")
+import_code("/root/zer0day/io")
 
-VERSION = "1.0.0"
+VERSION = "1.0.3"
 
-proxy = new Server
-proxy.ip = "14.207.242.245"
-proxy.port = 22
-proxy.user = "root"
-proxy.password = "SbyAgYcx2S5FQxy"
+// proxy = new Server
+// proxy.ip = "14.207.242.245"
+// proxy.port = 22
+// proxy.user = "root"
+// proxy.password = "SbyAgYcx2S5FQxy"
 
+// db = new Server
+// db.ip = "102.44.143.156"
+// db.port = 22
+// db.user = "root"
+// db.password = "SPLF6UULZNg7ghg"
+
+// Test server
 db = new Server
-db.ip = "102.44.143.156"
+db.ip = "81.124.50.63"
 db.port = 22
 db.user = "root"
-db.password = "SPLF6UULZNg7ghg"
+db.password = "mantho"
 
 logo =        "<b><color=#fff> _____             <color=#00bbff>____</color>      __            </color></b>\n"
 logo = logo + "<b><color=#fff>/__  /  ___  _____<color=#00bbff>/ __ \</color>____/ /___ ___  __ </color></b>\n"
@@ -194,11 +202,13 @@ menu_product_publish = function ()
     price = input_number("Product price ")
 
     while 1
-      files = input_string("Product files (path1,path2...) ", 1).split(",")
-      files_paths = []
+      files = input_string("Product files (path1, path2...) ", 1).split(",")
+      file_paths = []
+      file_names = []
 
       check = 1
       for file in files
+        file = file.trim
         if file[0] != "/" then
           file = current_path + "/" + file
         end if
@@ -209,12 +219,13 @@ menu_product_publish = function ()
           break
         end if
 
-        files_paths.push(file)
+        file_paths.push(file)
+        file_names.push(file.split("/").pop)
       end for
 
       if check then
         upload = 1
-        for path in files_paths
+        for path in file_paths
           result = product_upload(title, path)
           if not result then
             print_error("Error uploading file " + path)
@@ -230,7 +241,7 @@ menu_product_publish = function ()
       end if
     end while
 
-    product = product_create(title, description, price, files)
+    product = product_create(title, description, price, file_names)
     if product then
       print_string("Product published")
       break
@@ -268,6 +279,8 @@ menu_product_shop = function (search="", sort="")
   if sort then
     menu.header = menu.header + "<color=#00bbff>[+] <color=#fff>Sorting by " + sort + "\n"
     products_filtered.sort(sort)
+  else
+    products_filtered.sort("purchases")
   end if
 
   for product in products_filtered
@@ -286,45 +299,56 @@ menu_product_shop = function (search="", sort="")
 end function
 
 menu_product_update = function (product)
+  print_warning("Press return to keep field unchanged")
   new_description = input_string("New description ", 0, 100)
   new_price = input_number("New price ", 0)
   while 1
-    new_files = input_string("New files (path1,path2...) ")
+    new_files = input_string("New files (path1, path2...) ")
     if not new_files.len then
       break
     end if
     new_files = new_files.split(",")
+    file_paths = []
+    file_names = []
 
-    upload = 1
+    check = 1
     for file in new_files
-      new_files[new_files.indexOf(file)] = file.split("/").pop()
-
+      file = file.trim
       if file[0] != "/" then
         file = current_path + "/" + file
       end if
 
-      result = product_upload(product.title, file)
-      if not result then
-        upload = 0
+      if not get_shell().host_computer.File(file) then
         print_error("File could not be found: " + file)
+        check = 0
         break
       end if
+
+      file_paths.push(file)
+      file_names.push(file.split("/").pop)
     end for
 
-    if not upload then
-      for file in new_files
-        product_rmfile(product.title, file)
+    if check then
+      upload = 1
+      for path in file_paths
+        result = product_upload(product.title, path)
+        if not result then
+          print_error("Error uploading file " + path)
+          upload = 0
+          break
+        end if
       end for
-      continue
-    end if
 
-    for file in product.files
-      if new_files.indexOf(file) == null then
-        product_rmfile(product.title, file)
+      if upload then
+        for file in product.files
+          if file_names.indexOf(file) == null then
+            product_rmfile(product.title, file)
+          end if
+        end for
+
+        break
       end if
-    end for
-
-    break
+    end if
   end while
 
   if new_description then
@@ -334,7 +358,7 @@ menu_product_update = function (product)
     product.price = new_price
   end if
   if new_files then
-    product.files = new_files
+    product.files = file_names
   end if
   product.save()
 
@@ -418,7 +442,7 @@ menu_product_manage = function ()
 
   for product in logged_user.products
     product = product_load(product)
-    products_list.push([product.title, @menu_product_info, product])
+    products_list.push([[product.title, product.score, product.purchases], @menu_product_info, product])
   end for
 
   if not products_list.len then
@@ -427,6 +451,7 @@ menu_product_manage = function ()
   end if
 
   menu = new Menu
+  menu.fields = ["TITLE", "SCORE", "PURCHASES"]
   menu.options = products_list
   menu.paging = 10
   menu.call()
@@ -471,10 +496,20 @@ end while
 
 clear_screen()
 print_string("Connecting to servers...")
-db_conn = db.connect(proxy.connect())
+// db_conn = db.connect(proxy.connect)
+db_conn = db.connect
+
+seed = 0
+for i in get_shell.host_computer.public_ip.split(".")
+  seed = seed + i.to_int
+end for
+seed = round(seed * pi)
+
+color = "#" + md5(get_shell.host_computer.public_ip + rnd(seed))[:6]
 
 menu_auth = new Menu
-menu_auth.header = logo
+menu_auth.header = logo + "<color=#fff><color=#00bbff>[+]</color> This computer color is <b>[<color=" + color + ">########</color>]\n"
+menu_auth.header = menu_auth.header + "<color=#ffbf00>[!] This is a fake client if this information is false\n"
 menu_auth.options = [["Login", @menu_user_login], ["Register", @menu_user_register]]
 menu_auth.can_back = 0
 menu_auth.call()
@@ -486,7 +521,7 @@ while 1
     menu_auth.call()
   else
     globals.logged_user = user_load(logged_user.username)
-    menu_main.header = logo + "<color=#00bbff>[+] <color=#fff>Logged as </color>" + logged_user.username + "\n"
+    menu_main.header = logo + "<color=#fff><color=#00bbff>[+]</color> Welcome to Zer0day <color=#00bbff>" + logged_user.username + "</color>, use 'help' for command list\n"
     menu_main.call()
     wait(2)
   end if

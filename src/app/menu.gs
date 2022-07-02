@@ -1,5 +1,3 @@
-menu_list = []
-
 Menu = {}
 Menu.header = ""
 Menu.fields = []
@@ -90,17 +88,26 @@ Menu.call = function ()
           print_string("Goodbye :)")
           exit()
         else if option[0] == "help" then
-          help_text =             "<color=#00bbff> help</color>                <color=#fff>Displays this text\n"
-          help_text = help_text + "<color=#00bbff> back, b</color>             <color=#fff>Go back to the last accessed menu\n"
-          help_text = help_text + "<color=#00bbff> nextpage, np</color>        <color=#fff>Go to the next menu page\n"
-          help_text = help_text + "<color=#00bbff> backpage, bp</color>        <color=#fff>Go to the previous menu page\n"
-          help_text = help_text + "<color=#00bbff> search <keyword></color>    <color=#fff>Search for products\n"
-          help_text = help_text + "                     <color=#fff>only works while browsing the shop\n"
-          help_text = help_text + "<color=#00bbff> sort <field></color>        <color=#fff>Sort products\n"
-          help_text = help_text + "                     <color=#fff>only works while browsing the shop\n"
-          help_text = help_text + "<color=#00bbff> exit</color>                <color=#fff>Closes this app"
+          help_text =             "<color=#fff> <color=#00bbff>help</color>                Displays this text\n"
+          help_text = help_text + "<color=#fff> <color=#00bbff>back, b</color>             Go back to the last accessed menu\n"
+          help_text = help_text + "<color=#fff> <color=#00bbff>nextpage, np</color>        Go to the next menu page\n"
+          help_text = help_text + "<color=#fff> <color=#00bbff>backpage, bp</color>        Go to the previous menu page\n"
+          help_text = help_text + "<color=#fff> <color=#00bbff>search <keyword></color>    Search for products\n"
+          help_text = help_text + "<color=#fff>                     only works while browsing the shop\n"
+          help_text = help_text + "<color=#fff> <color=#00bbff>sort <field></color>        Sort products\n"
+          help_text = help_text + "<color=#fff>                     only works while browsing the shop\n"
+          help_text = help_text + "<color=#fff> <color=#00bbff>credits</color>             Display credits\n"
+          help_text = help_text + "<color=#fff> <color=#00bbff>exit</color>                Closes this app"
           print(help_text)
           continue
+        else if option[0] == "credits" then
+          credits_text =                "<color=#fff> [<color=#00bbff>Thitav</color>]   Developer and publisher\n"
+          credits_text = credits_text + "<color=#fff> [<color=#00bbff>3nigma</color>]   Supporter and tester\n"
+          credits_text = credits_text + "<color=#fff> [<color=#00bbff>Clover</color>]   Weasel security consultant\n"
+          credits_text = credits_text + "<color=#fff> [<color=#00bbff>You</color>]      For supporting this project!"
+          print(credits_text)
+          continue
+        end if
         end if
 
         if self.paging then

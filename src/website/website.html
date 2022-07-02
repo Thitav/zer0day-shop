@@ -5,19 +5,23 @@
     <style>
       body { text-align: center; padding: 0; border: 0; margin: 0; color: whitesmoke; background-color: #3b3b3b; }
       h1 { font-size: 30px; }
-      h2 { font-size: 21px;}
+      h2 { font-size: 21px; }
+      h3 { font-size: 18px; }
       .topdiv { width: 100%; height: 50px; background-color: black; }
       .topbutton { text-align: justify; background-color: inherit; color: inherit; font-size: 20px; width: 100px; border: 0; margin-top: 10px; }
       .maindiv { background-color: #2b2b2b; border-radius: 10px; padding: 25px; font-size: 16px; margin: 10px; }
       .codediv { text-align: left; background-color: black; color: #39ff14; padding: 10px; border-radius: 10px; width: 35%; margin: 0 auto; }
       .listdiv { text-align: left; margin: 0 auto; width: 35%; }
+      .iptext { color: #929d40 }
       #contactpage { display: none; }
+      #partnerspage { display: none; }
     </style>
   </head>
   <body>
     <div class="topdiv">
       <button class="topbutton" id="homebtn">Home</button>
       <button class="topbutton" id="contactbtn">Contact</button>
+      <button class="topbutton" id="partnersbtn">Partners</button>
       <button class="topbutton btn btn-primary" id="InformaticaShop">Download</button>
     </div>
     <div class="maindiv">
@@ -41,18 +45,33 @@
         </div>
       </div>
       <div id="contactpage">
-        <h1>Contact</h1><br><br>
+        <h1>Contact</h1><br><br><br>
         Contact me on Discord: Thitav#1215
+      </div>
+      <div id="partnerspage">
+        <h1>Partners</h1><br><br><br>
+        <div class="listdiv">
+          <strong>.</strong> BTC: <span class="iptext">160.16.37.115</span><br>
+          <strong>.</strong> FoxTrot: <span class="iptext">27.213.164.5</span><br>
+        </div><br><br><br><br>
+        <h3>If you are interested in becoming a partner please contact me!</h3>
       </div>
     </div>
     <script>
       document.getElementById("homebtn").addEventListener("click", function () {
         document.getElementById("homepage").style.display = "block";
         document.getElementById("contactpage").style.display = "none";
+        document.getElementById("partnerspage").style.display = "none";
       });
       document.getElementById("contactbtn").addEventListener("click", function () {
         document.getElementById("homepage").style.display = "none";
         document.getElementById("contactpage").style.display = "block";
+        document.getElementById("partnerspage").style.display = "none";
+      });
+      document.getElementById("partnersbtn").addEventListener("click", function () {
+        document.getElementById("homepage").style.display = "none";
+        document.getElementById("contactpage").style.display = "none";
+        document.getElementById("partnerspage").style.display = "block";
       });
     </script>
   </body>

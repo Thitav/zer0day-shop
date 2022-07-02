@@ -227,7 +227,7 @@ product_rmfile = function (title, file)
     return 0
   end if
 
-  file = db_conn.host_computer.File(PRODUCTS_PATH + product.title + "/" + file)
+  file = db_conn.host_computer.File(PRODUCTS_PATH + product.title + "/files/" + file)
   if not file then
     return 0
   end if

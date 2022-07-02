@@ -1,8 +1,11 @@
 ALPHANUMERICS = ["a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "0", "1", "2", "3", "4", "5", "6", "7", "8", "9"]
 
-input_string = function (message, min=0, max=0, only_alpha=0, is_password=0)
+input_string = function (message, min=0, max=0, only_alpha=0, is_password=0, trim=1)
   while 1
     input = user_input("<color=#fff>" + message + "<color=#00bbff>> </color>", is_password)
+    if trim and not is_password then
+      input = input.trim
+    end if
 
     if min and max then
       if not (input.len >= min and input.len <= max) then
