@@ -1,10 +1,7 @@
 # Zer0Day Shop
 
-A shop made for Grey Hack game
+A shop made for the game Grey Hack
 
-# TODO
-  - Display rankings at main menu
-  - Add more options to the search and sort system
+### ⚠️ Disclaimer ⚠️
 
-# Known issues
-  - None
+This project is abandoned, feel free to use all its code on your projects.

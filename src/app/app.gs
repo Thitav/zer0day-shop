@@ -1,6 +1,12 @@
 import_code("/root/zer0day/BTC")
 
 apt = include_lib("/lib/aptclient.so")
+if not apt then
+  apt = include_lib(current_path + "/aptclient.so")
+  if not apt then
+    print_error("aptclient.so lib not found", 1)
+  end if
+end if
 
 import_code("/root/zer0day/product")
 import_code("/root/zer0day/utils")
@@ -10,7 +16,7 @@ import_code("/root/zer0day/hash")
 import_code("/root/zer0day/db")
 import_code("/root/zer0day/io")
 
-VERSION = "1.0.3"
+VERSION = "1.0.4"
 
 // proxy = new Server
 // proxy.ip = "14.207.242.245"
@@ -199,7 +205,7 @@ menu_product_publish = function ()
     end if
 
     description = input_string("Product description ", 0, 100)
-    price = input_number("Product price ")
+    price = input_number("Product price ", 1)
 
     while 1
       files = input_string("Product files (path1, path2...) ", 1).split(",")
@@ -476,23 +482,23 @@ menu_product_library = function ()
   menu.call()
 end function
 
-clear_screen()
-print_string("Checking repository...")
-while 1
-  result = apt.check_upgrade(program_path)
-  if typeof(result) == "string" then
-    print_string("Adding repository...")
-    apt.add_repo("12.239.171.129", 1542)
-    apt.update()
-    continue
-  else if result then
-    print_string("New version found, updating...")
-    apt.install("zer0day", current_path)
-    print_string("Update installed, please restart the application")
-    exit()
-  end if
-  break
-end while
+// clear_screen()
+// print_string("Checking repository...")
+// while 1
+//   result = apt.check_upgrade(program_path)
+//   if typeof(result) == "string" then
+//     print_string("Adding repository...")
+//     apt.add_repo("12.239.171.129", 1542)
+//     apt.update()
+//     continue
+//   else if result then
+//     print_string("New version found, updating...")
+//     apt.install("zer0day", current_path)
+//     print_string("Update installed, please restart the application")
+//     exit()
+//   end if
+//   break
+// end while
 
 clear_screen()
 print_string("Connecting to servers...")
